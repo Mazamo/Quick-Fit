@@ -31,6 +31,7 @@ SECTION .text
 	global getFront				; Retrieve the data stored in the head node.
 	global getBack				; Retrieve the data stored in the tail node.
 	global getIndex				; Retrieve the data stored in the n'th node of the list.
+	global findData 			; Iterate through the list and search for a criterium.
 
 	;-----------------------------------------------------------------------------	
 	; Construction method for a linked list structure. This method intialises the 
@@ -476,7 +477,7 @@ SECTION .text
 		ret
 
 	;-----------------------------------------------------------------------------
-	; Deltete the element on the specified index from the list 
+	; Delete the element on the specified index from the list 
 	; -- Last update 03/02/2018
 	;
 	; Parameters:
@@ -563,3 +564,60 @@ SECTION .text
 		pop ecx
 		pop ebx
 		ret
+
+	;-----------------------------------------------------------------------------
+	; Finds a node based on a specific criterium which is specief in a pointer 
+	; to a function. -- Last update 05/02/2018
+	;
+	; Parameters:
+	; 	EAX: Pointer to the linked list
+	; 	EBX: Pointer to the search function.
+	;
+	; Return:
+	; 	EAX: Pointer to the data member of the find node or a nullptr if no node 
+	;		 is found.
+	;-----------------------------------------------------------------------------
+	findData:
+		push ebx					; Store the used registers on the stack.
+		push ecx
+
+		cmp eax, 0					; Determine if eax contains a valid value.
+		je .noAction				; If eax is invallid leave the routine.
+
+		cmp ebx, 0					; Determine if ebx contains a valid value.
+		je .noAction				; If eax is invallid leave the routine.
+
+		cmp dword [eax], 0			; Determine if the linked list is empty.
+		je .noAction				; If the linked list is empty leave the routine.
+
+		mov eax, [eax]				; Move the first node of the list into eax.
+
+	.iterateThroughList:
+		push eax					; Store the current node on the stack.
+		mov eax, [eax + 8]			; Store the data stored in the current node into eax.
+		call ebx					; Call the routine for searching the data member.
+		mov ecx, eax				; Store the return value in ecx.
+		pop eax						; Restore the current node value into eax.
+
+		cmp ebx, 1					; Determine if the current node is the right node.
+		je .foundData				; If the current node is the right node leave the routine.
+
+		mov eax, [eax]				; Move the current node's next member into eax.
+		
+		cmp eax, 0					; Determine if the next node is a nullptr (end of the list).
+		je .doneFinding				; If the end has been reached leave the routine.
+
+		jmp .iterateThroughList		; Loop around.
+
+	.foundData:
+		mov eax, [eax + 8]			; Move the address of the searched data into eax.
+		jmp .doneFinding			; Leave the routine.
+
+	.noAction:
+		mov eax, 0					; Move a invallid state into eax.
+
+	.doneFinding:
+		pop ecx						; Restore the used registers to their original state.
+		pop ebx
+		ret
+

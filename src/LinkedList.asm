@@ -1,5 +1,5 @@
 ; Source name			: LinkedList.asm
-; Exectuable name		; None
+; Exectuable name		: None
 ; Version				: 1.0
 ; Created date			: 01/02/2018
 ; Last update			: 05/02/2018
@@ -34,7 +34,7 @@ SECTION .text
 	global findData 			; Iterate through the list and search for a criterium.
 
 	;-----------------------------------------------------------------------------	
-	; Construction method for a linked list structure. This method intialises the 
+	; Construction method for a linked list structure. This method intializes the 
 	; linked list structure by initialising both the head and tail nodes with the
 	; vaule of zero indicating that the list is empty. -- Last update 02/02/2018
 	;
@@ -43,8 +43,8 @@ SECTION .text
 	;
 	; Return:
 	;	None
-	;-----------------------------------------------------------------------------	
-	createLinkedList:
+	;-----------------------------------------------------------------------------
+	createLinkedList:				
 		cmp eax, 0					; Determine if eax points to a valid memory address.
 		jne .initializeList			; If eax does not point to a null pointer. 
 		ret							; If eax is a nullptr leave the routine.

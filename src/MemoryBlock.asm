@@ -11,17 +11,21 @@
 ;	Allocated/Free: Value indicating if the memory block is currently free or allocated.
 ;	Data address: Pointer to the actual memory following the block structure.
 
+global MemoryBlockSize					; The size of a memory block structure.
+
 SECTION .data
 
 SECTION .bss
+	MemoryBlockSize			equ 2		; The size of a memory block structure in dwords.
 
 SECTION .text
 	global initializeMemoryBlock		; Create a new memory block structure.
 	global destroyMemoryBlock			; Destroy a memory block structure.
 	global allocateMemoryBlock			; Allocate a memory block structure.
-	global deallocatMemoryBlock			; Deallocate a memory block structure.
+	global deallocateMemoryBlock		; Deallocate a memory block structure.
 	global getMemoryAddress				; Retrieve a pointer memory block.
 	global findMemoryBlock				; Find a memory block based on its address.
+	global findFreeMemoryBlock			; Find a free memory block based on its allocated member.
 
 	;-----------------------------------------------------------------------------
 	; Construction method for a memory block structure. This method initializes the
@@ -40,13 +44,14 @@ SECTION .text
 		ret								; If eax contains a invalid address leave the routine.
 
 	.initializeMemoryBlock:
+		push ebx 
+
 		mov dword [eax], 1				; Move a value into the block´s alloc. member indicating
 										; it's allocated.
+		lea ebx, [eax + 8]
+		mov dword [eax + 4], ebx
 
-		mov eax, [eax + 4]
-		lea eax , [eax + 8]				; Move the address of the actual writeble memory region
-										; into the block's address member.
-		mov eax, [eax - 4]
+		pop ebx
 		ret
 
 	;-----------------------------------------------------------------------------
@@ -64,8 +69,8 @@ SECTION .text
 		cmp eax, 0						; Determine if eax contains a valid value.
 		je .doneDestroying				; If eax contains an invalid value leave the routine.
 	
-		mov dword [eax], 0				
-		mov dword [eax + 4], 0
+		mov dword [eax], 0				; Move the allocated member of the memory block to zero.	
+		mov dword [eax + 4], 0			; Move the data member of the memory block to zero.
 
 	.doneDestroying:
 		ret
@@ -137,16 +142,16 @@ SECTION .text
 	;
 	; Parameters:
 	;	EAX: Pointer to the memory block
-	; 	EBX: Memory address used for comparison
+	; 	ECX: Memory address used for comparison
 	;
 	; Return:
 	; 	EAX: Value indicating the result of the comparions (1 equal, 0 unequal).
 	;-----------------------------------------------------------------------------
 	findMemoryBlock:
-		cmp eax, 0						; Determine if eac contains a valid value.
+		cmp eax, 0						; Determine if eax contains a valid value.
 		je .doneComparing				; If eax is invalid leave the routine.
 
-		cmp dword [eax + 4], ebx		; Compare ebx with the block's memory address member. 
+		cmp dword [eax + 4], ecx		; Compare ebx with the block's memory address member. 
 		jne .unequal					; If the two differ fill eax with zero.
 
 		mov eax, 1						; If the two are equal fill eax with one.
@@ -156,4 +161,23 @@ SECTION .text
 		mov eax, 0						; Indicate that the block's memory member and ebx differ.
 
 	.doneComparing:				
+		ret
+
+	;-----------------------------------------------------------------------------
+	; Find a free memory block by comparing 
+	;-----------------------------------------------------------------------------
+	findFreeMemoryBlock:
+		cmp eax, 0						; Determine if eax contains a valid value.
+		je .doneComparing				; If eax is invalid leave the routine.
+
+		cmp dword [eax], 0				; Determine if the memory block is free.
+		jne .unequal					; If the block is not free.
+
+		mov eax, 1						; If the block is free move one into eax.
+		jmp .doneComparing				; Leave the routine.
+
+	.unequal:
+		mov eax, 0						; Indicate that the block is already allocated
+
+	.doneComparing:
 		ret

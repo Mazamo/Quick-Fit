@@ -15,9 +15,14 @@
 ;	prev: pointer to the previous node
 ;	data: pointer to the data inside the node
 
+global ListSize					; The size of a list structure.
+global NodeSize					; The size of a node structure.
+
 SECTION .data
-	
+
 SECTION .bss
+	ListSize		equ 2		; The size of a list structure in dwords.
+	NodeSize		equ 3		; The size of a node structure in dwords.
 	
 SECTION .text
 	global createLinkedList		; Create a new list instance.
@@ -572,6 +577,7 @@ SECTION .text
 	; Parameters:
 	; 	EAX: Pointer to the linked list
 	; 	EBX: Pointer to the search function.
+	;   ECX: Value to be compared in the search function.
 	;
 	; Return:
 	; 	EAX: Pointer to the data member of the find node or a nullptr if no node 
@@ -599,6 +605,7 @@ SECTION .text
 		mov ecx, eax				; Store the return value in ecx.
 		pop eax						; Restore the current node value into eax.
 
+	.debug
 		cmp ebx, 1					; Determine if the current node is the right node.
 		je .foundData				; If the current node is the right node leave the routine.
 
@@ -620,4 +627,3 @@ SECTION .text
 		pop ecx						; Restore the used registers to their original state.
 		pop ebx
 		ret
-

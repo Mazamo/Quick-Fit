@@ -23,7 +23,6 @@ SECTION .text
 	extern deallocateData
 	extern getIndex
 	extern printElements
-
 	extern ListOnePtr
 	extern ListTwoPtr
 	extern ListThreePtr
@@ -48,54 +47,54 @@ SECTION .text
 	; 	None
 	;-----------------------------------------------------------------------------
 	printMemoryBlock:
-		pushad
+		pushad							; Store all the registers on the stack.	
 
-		cmp eax, 0
-		je .donePrinting
+		cmp eax, 0						; Determine if eax is valid.
+		je .donePrinting				; If eax is not valid leave the routine.
 
-		inc ebx
+		inc ebx							; Increment ebx for a easier reading (not starting at 0 etc.).
 
-		pushad
-		push esi
-		push BlockMessage
-		call printf
-		add esp, 8
-		popad
+		pushad							; Store all of the registers on the stack.
+		push esi						; Push the size of the block on the call stack.
+		push BlockMessage				; Push the BlockMessage on the call stack.
+		call printf						; Printf the message.
+		add esp, 8						; Adjust esp.
+		popad							; Restore all the registers.
 
-		cmp dword [eax], 0
-		je .printFreeBlock
-		jmp .printAllocatedBlock
+		cmp dword [eax], 0				; Determine if the memory block is allocated.
+		je .printFreeBlock				; If the memory block is not allocated print the according message.
+		jmp .printAllocatedBlock		; If the memory block is allocated print the according message.
 
 	.printAllocatedBlock:
-		mov eax, [eax + 4]
+		mov eax, [eax + 4]				; Move the address of the writeable memory block into eax.
 
-		cmp dword [eax], 0
-		je .printAllocatedEmptyBlock
+		cmp dword [eax], 0				; Determine if the block contains writable data.
+		je .printAllocatedEmptyBlock	; If the block is empty (contains nullptrs).
 		
-		push eax 
-		push ebx
-		push AllocMessage
-		call printf
-		add esp, 12
+		push eax						; Push the address of the memory block's writable data.
+		push ebx						; Push the index of the block (+1) on the call stack
+		push AllocMessage				; Push the message on the call stack.
+		call printf						; Print the message.
+		add esp, 12						; Adjust esp.
 
-		jmp .donePrinting
+		jmp .donePrinting				; Leave the routine.
 
 	.printAllocatedEmptyBlock:
-		push ebx
-		push AllocEmptyMessage
-		call printf
-		add esp, 8
+		push ebx						; Push the index (+1) on the call stack.
+		push AllocEmptyMessage			; Push the the message on the call stack.
+		call printf						; Print the message.
+		add esp, 8						; Adjust esp.
 
-		jmp .donePrinting
+		jmp .donePrinting				; Leave the routine.
 
 	.printFreeBlock:
-		push ebx
-		push FreeMessage
-		call printf
-		add esp, 8
+		push ebx						; Push the index (+1) on the call stack.
+		push FreeMessage				; Push the message on the call stack.
+		call printf						; Print the message.
+		add esp, 8						; Adjust esp.
 
 	.donePrinting:
-		popad
+		popad							; Restore all the registers to their original values.
 		ret
 		
 	;--------------------------------------------------------------------------
@@ -103,24 +102,60 @@ SECTION .text
 	; syscalls.
 	;--------------------------------------------------------------------------
 	main:
-		push ebp
-		mov ebp, esp
+		push ebp						; Store the value of ebp on the stack.
+		mov ebp, esp					; Move the initial value of esp into ebp.
 
 		mov eax, BufferPtr				; Move the address of the buffer into eax.
 		mov ebx, BufferLen				; Move the size of the buffer into ebx.
 		call bufferInitialize			; Create and initialize the memory buffer.
 
-		mov eax, 120					; Specify a 120 byte block.
+		mov eax, 5						; Specify a 5 byte block.
 		call allocateData				; Allocate the memory region.
 
-		mov eax, 140
-		call allocateData
+		mov eax, 10						; Specify a 10 byte block.
+		call allocateData				; Allocate the memory region.
 
-		mov eax, 10
-		call allocateData
+		mov eax, 20						; Specify a 20 byte block.
+		call allocateData				; Allocate the memory region.
 
-		mov eax, 40
-		call allocateData
+		mov eax, 30						; Specify a 30 byte block.
+		call allocateData				; Allocate the memory region.
+
+		mov eax, 40						; Specify a 40 byte block.
+		call allocateData				; Allocate the memory region.
+
+		mov eax, 50						; Specify a 50 byte block.
+		call allocateData				; Allocate the memory region.
+
+		mov eax, 60						; Specify a 60 byte block.
+		call allocateData				; Allocate the memory region.
+
+		mov eax, 70						; Specify a 70 byte block.
+		call allocateData				; Allocate the memory region.
+
+		mov eax, 80						; Specify a 80 byte block.
+		call allocateData				; Allocate the memory region.
+
+		mov eax, 90						; Specify a 90 byte block.
+		call allocateData				; Allocate the memory region.
+
+		mov eax, 100					; Specify a 100 byte block.
+		call allocateData				; Allocate the memory region.
+
+		mov eax, 110					; Specify a 110 byte block.
+		call allocateData				; Allocate the memory region.
+
+		mov eax, 120					; Specify a 120 byte block.
+		call allocateData				; Allocate the memory region.
+		
+		mov eax, 130					; Specify a 130 byte block.
+		call allocateData				; Allocate the memory region.
+
+		mov eax, 140					; Specify a 140 byte block.
+		call allocateData				; Allocate the memory region.
+
+		mov eax, 150					; Specify a 150 byte block.
+		call allocateData				; Allocate the memory region.
 
 		; Print all of the existing memory blocks:
 		mov ebx, printMemoryBlock
@@ -151,6 +186,6 @@ SECTION .text
 		
 		call bufferDestroy
 
-		mov esp, ebp
-		pop ebp
+		mov esp, ebp					; Move the value of the original stack pointer back into esp.
+		pop ebp							; Restore ebp.
 		ret

@@ -266,7 +266,7 @@ SECTION .text
 		jmp .noAction				; Leave the routine.
 
 	.preIterate:
-		mov eax, [eax]
+		mov eax, [eax]				; Move the first node into eax.
 	.iterateThroughList:
 		cmp edx, 0					; Determine if the element is reached.
 		je .addNode					; If the element has been reached add a node after it.
@@ -644,9 +644,9 @@ SECTION .text
 	; 	None
 	;-----------------------------------------------------------------------------
 	printElements:
-		push eax
+		push eax					; Store the used registers on the stack.
 		push ebx
-		push ecx					; Store the used registers on the stack.
+		push ecx					
 		push edx 
 
 		cmp eax, 0					; Determine if eax is valid. 
@@ -667,7 +667,6 @@ SECTION .text
 		je .donePrinting			; If a null pointer was returned leave the routine.
 
 		call edx					; Print the contents of the element.
-	.debug:
 		inc ebx						; Increment ebx to be able to call the node.
 
 		jmp .iterateThroughList		; Loop around.

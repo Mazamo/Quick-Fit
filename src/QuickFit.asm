@@ -329,7 +329,6 @@ SECTION .text
 		mov eax, ebx					; Move the address of the memory block into eax.
 		pop ebx							; Restore ebx with the size of the allocated memory block.
 
-	.debug:
 
 		add ebx, NodeSize				; Add the size of the newly added node to the memory block
 										; size.

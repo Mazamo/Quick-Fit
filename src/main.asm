@@ -2,11 +2,15 @@
 ; Executuble name			: QuickFit 
 ; Version					: 1.0
 ; Created date				: 10/02/2018
-; Last update				: 10/02/2018
+; Last update				: 11/02/2018
 ; Author					: Nick de Visser
 ; Description				: Main logic for the QuickFit logic.
 
 SECTION .data
+	BlockMessage 		db 	"These blocks are %d bytes in size:", 10, 0
+	AllocMessage		db  "%d. This block is allocted and contains the following: %s", 10, 0
+	AllocEmptyMessage	db  "%d. This block is allocted and contains no data.", 10, 0
+	FreeMessage			db 	"%d. This block is free.", 10, 0
 
 SECTION .bss
 	BufferPtr	resb	50000		; Pointer to the buffer's memory range. 
@@ -18,63 +22,107 @@ SECTION .text
 	extern allocateData
 	extern deallocateData
 	extern getIndex
+	extern printElements
 
-	global _start
-	
+	extern ListOnePtr
+	extern ListTwoPtr
+	extern ListThreePtr
+	extern ListFourPtr
+	extern ListFivePtr
+	extern ListSixPtr
+
+	extern printf
+
+	global main
+
 	;-----------------------------------------------------------------------------
-	; Prints the state and content of a list's memory block elements.
-	; -- Last update 10/02/2018
+	; Print a memory block structure. This method is system dependent and 
+	; relies on Linux dependant syscalls. -- Last update 11/02/2018
 	;
 	; Parameters:
-	;	EAX: Pointer to the list from which the memory block elements are printed.
+	; 	EAX: Pointer to the memory block structure that is displayed
+	; 	EBX: Index of the memory block in the list
 	;
 	; Return:
-	;	None
+	; 	None
 	;-----------------------------------------------------------------------------
-	printBlocks:
-		push ebx						; Store the used registers on the stack.
-		push ecx
-
-		cmp eax, 0						; Determine if eax is valid.
-		je .donePrinting				; If eax is invalid leave the routine.
-		
-		mov ecx, eax					; Move the address of the linked list into ecx.
-		mov ebx, 0						; Move the first index into ebx.
-
-	.iterateThroughList:
-		mov eax, ecx
-		call getIndex		
+	printMemoryBlock:
+		pushad
 
 		cmp eax, 0
 		je .donePrinting
-			
-		call printValues
+
 		inc ebx
 
-		jmp .iterateThroughList
+		cmp dword [eax], 0
+		je .printFreeBlock
+		jmp .printAllocatedBlock
+
+	.printAllocatedBlock:
+		mov eax, [eax + 4]
+
+		cmp dword [eax], 0
+		je .printAllocatedEmptyBlock
+		
+		push eax 
+		push ebx
+		push AllocMessage
+		call printf
+		add esp, 12
+
+		jmp .donePrinting
+
+	.printAllocatedEmptyBlock:
+		push ebx
+		push AllocEmptyMessage
+		call printf
+		add esp, 8
+
+		jmp .donePrinting
+
+	.printFreeBlock:
+		push ebx
+		push FreeMessage
+		call printf
+		add esp, 8
 
 	.donePrinting:
-		mov eax, ecx
-
-		pop ecx
-		pop ebx
+		popad
 		ret
+		
+	;--------------------------------------------------------------------------
+	; Main logic. This method is sytem depent and relies on Linux dependant
+	; syscalls.
+	;--------------------------------------------------------------------------
+	main:
+		push ebp
+		mov ebp, esp
 
-	_start:
-		mov eax, BufferPtr
-		mov ebx, BufferLen
-		call bufferInitialize
+		mov eax, BufferPtr				; Move the address of the buffer into eax.
+		mov ebx, BufferLen				; Move the size of the buffer into ebx.
+		call bufferInitialize			; Create and initialize the memory buffer.
 
-		mov eax, 120
+		mov eax, 120					; Specify a 120 byte block.
+		call allocateData				; Allocate the memory region.
+
+		mov eax, 140
 		call allocateData
 
-		mov eax, 120
+		mov eax, 10
 		call allocateData
 
+		mov eax, 40
+		call allocateData
+
+		mov ebx, printMemoryBlock
+
+		mov eax, [ListSixPtr]
+		call printElements
+		
 		call bufferDestroy
 
-		mov eax, 1
-		mov ebx, 0
-		int 80h
+		mov esp, ebp
+		pop ebp
+		ret
 
 

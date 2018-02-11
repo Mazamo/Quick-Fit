@@ -6,6 +6,13 @@
 ; Author				: Nick de Visser
 ; Decription			: An implementation of the quick fit memory allocation algorithm.
 
+global ListOnePtr
+global ListTwoPtr
+global ListThreePtr
+global ListFourtPtr
+global ListFivePtr
+global ListSixPtr
+
 SECTION .data
 
 SECTION .bss
@@ -179,23 +186,29 @@ SECTION .text
 		cmp eax, 0						; Determine if a null byte sized block is requested.
 		je .doneAllocating				; If eax is null leave the routine.
 
-		cmp eax, HUNDREDSIXTY_BLOCK		; Determine if the requested block is greater than the largest 
-										; available block.
-		jg .doneAllocating				; If the required block will is not allocatable leave the routine.
+		cmp eax, HUNDREDSIXTY_BLOCK		; Determine if the requested block is greater than the 
+										; largest available block.
+		jg .doneAllocating				; If the required block will is not allocatable leave the 
+										; routine.
 
-		cmp eax, FIVE_BLOCK				; Determine if the requested block is equal or below a FIVE_BLOCK.
+		cmp eax, FIVE_BLOCK				; Determine if the requested block is equal or below a 
+										; FIVE_BLOCK.
 		jbe .allocateFiveBlock			; Allocate a block of five bytes.
 
-		cmp eax, TEN_BLOCK				; Determine if the requested block is equal or below a TEN_BLOCK.
+		cmp eax, TEN_BLOCK				; Determine if the requested block is equal or below a 
+										; TEN_BLOCK.
 		jbe .allocateTenBlock			; Allocate a block of ten bytes.
 
-		cmp eax, TWENTY_BLOCK			; Determine if the requested block is equal or below a TWENTY_BLOCK.
+		cmp eax, TWENTY_BLOCK			; Determine if the requested block is equal or below a 
+										; TWENTY_BLOCK.
 		jbe .allocateTwentyBlock		; Allocate a block twenty bytes.
 
-		cmp eax, FOURTY_BLOCK			; Determine if the requested block is equal or below a FOURTHY_BLOCK.
+		cmp eax, FOURTY_BLOCK			; Determine if the requested block is equal or below a 
+										; FOURTHY_BLOCK.
 		jbe .allocateFourthyBlock		; Allocate a block of fourthy bytes.
 
-		cmp eax, EIGHTY_BLOCK			; Determine if the requested block is equal or below a EIGHTY_BLOCK.
+		cmp eax, EIGHTY_BLOCK			; Determine if the requested block is equal or below a 
+										; EIGHTY_BLOCK.
 		jbe .allocateEightyBlock		; Allocate a block of eighty bytes.
 
 		jmp .allocateHundredSixtyBlock	; Allocate a block of hundredsixity bytes.
@@ -205,35 +218,40 @@ SECTION .text
 		mov ebx, FIVE_BLOCK				; Move the appropiate size into ebx.
 		call allocateBlock				; Allocate the memory block on the buffer.
 	
-		jmp .doneAllocating				; Leave the routine once finsihed allocation the memory block.
+		jmp .doneAllocating				; Leave the routine once finsihed allocation the memory 
+										; block.
 
 	.allocateTenBlock:
 		mov eax, [ListTwoPtr]			; Store a pointer to the second list into eax.
 		mov ebx, TEN_BLOCK				; Move the appropiate size into ebx.
 		call allocateBlock				; Allocate the memory block on the buffer.
 
-		jmp .doneAllocating				; Leave the routine once finsihed allocation the memory block.
+		jmp .doneAllocating				; Leave the routine once finsihed allocation the memory 
+										; block.
 
 	.allocateTwentyBlock:
 		mov eax, [ListThreePtr]			; Store a pointer to the third list into eax.
 		mov ebx, TWENTY_BLOCK			; Move the appropiate size into ebx.
 		call allocateBlock				; Allocate the memory block on the buffer.
 
-		jmp .doneAllocating				; Leave the routine once finsihed allocation the memory block.
+		jmp .doneAllocating				; Leave the routine once finsihed allocation the memory 
+										; block.
 
 	.allocateFourthyBlock:
 		mov eax, [ListFourPtr]			; Store a pointer to the fourth list into eax.
 		mov ebx, FOURTY_BLOCK			; Move the appropiate size into ebx.
 		call allocateBlock				; Allocate the memory block on the buffer.
 
-		jmp .doneAllocating				; Leave the routine once finsihed allocation the memory block.
+		jmp .doneAllocating				; Leave the routine once finsihed allocation the memory 
+										; block.
 	
 	.allocateEightyBlock:
 		mov eax, [ListFivePtr]			; Store a pointer to the fifth list into eax.
 		mov ebx, EIGHTY_BLOCK			; Move the appropiate size into ebx.
 		call allocateBlock				; Allocate the memory block on the buffer.
 
-		jmp .doneAllocating				; Leave the routine once finsihed allocation the memory block.
+		jmp .doneAllocating				; Leave the routine once finsihed allocation the memory 
+										; block.
 
 	.allocateHundredSixtyBlock:
 		mov eax, [ListSixPtr]			; Store a pointer to the sixth list into eax.
@@ -269,10 +287,15 @@ SECTION .text
 		je .allocateNewBlock			; If the list is empty add the first memory block to it.
 		
 		push eax
+		
+	.prepop:
+		mov edx, ebx
 		mov ebx, findFreeMemoryBlock	; Move the address of the function in ebx.
 		call findData					; Find a free memory block in the list.
+		mov ebx, edx
 		mov ecx, eax
 		pop eax
+	.postpop
 		
 		cmp ecx, 0						; Determine if a free memory block has been found.
 		je .allocateNewBlock			; If no free block has been found allocate a new one.
@@ -286,7 +309,8 @@ SECTION .text
 		add edx, BufferSize
 		add ecx, ebx
 
-		cmp ecx, edx					; Determine if there is enough place to store the new mem. block.
+		cmp ecx, edx					; Determine if there is enough place to store the new 
+										; memory block.
 		ja .doneAllocating				; If there is not enough place leave the routine.
 
 		push ebx						; Push the used registers on the stack.
@@ -300,18 +324,22 @@ SECTION .text
 		pop eax							; Restore eax with the value of the linked list.
 		
 		mov ecx, [OffsetMemoryPtr]		; Store the address to store the node into ecx.
-		call addBack					; Add the node referencing the newly added mem. block to the list.
-
+		call addBack					; Add the node referencing the newly added mem. block to 
+										; the list.
 		mov eax, ebx					; Move the address of the memory block into eax.
 		pop ebx							; Restore ebx with the size of the allocated memory block.
 
-		add ebx, NodeSize				; Add the size of the newly added node to the mem. block size.
-		add ebx, MemoryBlockSize		; Add the size of the added memory block to the mem. block size.
 	.debug:
+
+		add ebx, NodeSize				; Add the size of the newly added node to the memory block
+										; size.
+		add ebx, MemoryBlockSize		; Add the size of the added memory block to the memory
+										; block size.
 		add ecx, ebx					; Add the used size to the memory offset. 
 		mov dword [OffsetMemoryPtr], ecx; Move the new offset into the OffsetMemoryPtr.
 
-	.allocateExistingBlock:				; It is assumed eax contains a pointer to a memory block structure.
+	.allocateExistingBlock:				; It is assumed eax contains a pointer to a memory block 
+										; structure.
 		call allocateMemoryBlock		; Allocate the memory block.
 		call getMemoryAddress			; Retrieve the address of the writeble memory range.
 	
@@ -335,7 +363,8 @@ SECTION .text
 		cmp eax, 0						; Determine if eax contains a valid value.
 		je .doneDeallocating			; If eax is invalid leave the routine.
 		
-		mov ebx, findMemoryBlock		; Move the address of the findMemoryBlock routine into ebx.
+		mov ebx, findMemoryBlock		; Move the address of the findMemoryBlock routine into 
+										; ebx.
 		mov ecx, eax					; Move the memory address stored in eax into ecx.
 
 		mov eax, [ListOnePtr]			; Move a pointer to the first list into eax.

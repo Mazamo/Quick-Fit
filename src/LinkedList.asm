@@ -4,7 +4,8 @@
 ; Created date			: 01/02/2018
 ; Last update			: 10/02/2018
 ; Author				: Nick de Visser
-; Description			: An implementation of a double linked list data structure using NASM 2.11.08.
+; Description			: An implementation of a double linked list data structure using 
+; 						  NASM 2.11.08.
 ;
 ; List layout:
 ;	head: pointer to the head node
@@ -37,6 +38,8 @@ SECTION .text
 	global getBack				; Retrieve the data stored in the tail node.
 	global getIndex				; Retrieve the data stored in the n'th node of the list.
 	global findData 			; Iterate through the list and search for a criterium.
+	global printElements		; Iterate through the list and print each element.
+
 
 	;-----------------------------------------------------------------------------	
 	; Construction method for a linked list structure. This method intializes the 
@@ -218,7 +221,8 @@ SECTION .text
 		mov dword [ecx + 4], edx	; Set the prev node of the new node to the current tail node.
 		mov dword [eax + 4], ecx	; Set the tail member of the list to the new node.
 		mov dword [ecx], 0			; Set the next member of the new node to null.
-		mov dword [ecx + 8], ebx	; Set the data member of the new node to reference the data's address.
+		mov dword [ecx + 8], ebx	; Set the data member of the new node to reference the data's
+									; address.
 
 	.doneAdding:
 		pop edx						; Restore the used registers to their original state.
@@ -625,3 +629,50 @@ SECTION .text
 		pop ecx						; Restore the used registers to their original state.
 		pop ebx
 		ret
+
+	;-----------------------------------------------------------------------------
+	; Retrieves the elements from the provided list and prints them usng the 
+	; provided method. -- Last update 10/02/2018
+	;
+	; Parameters:
+	; 	EAX: Pointer to the list from which the memory block's elements are printed
+	; 	EBX: Method used to print the data members values
+	;
+	; Return:
+	; 	None
+	;-----------------------------------------------------------------------------
+	printElements:
+		push eax
+		push ebx
+		push ecx					; Store the used registers on the stack.
+		push edx 
+
+		cmp eax, 0					; Determine if eax is valid. 
+		je .donePrinting			; If eax is invalid leave the routine.
+
+		cmp dword [eax], 0			; Deterrmine if the list contains elements.
+		je .donePrinting			; If the list is empty leave the routine.
+
+		mov ecx, eax				; Move the address of the linked list into ecx.
+		mov edx, ebx				; Move the printing method into edx.
+		mov ebx, 0					; Move the first index into edx.
+
+	.iterateThroughList:
+		mov eax, ecx				; Move the address of the linked list into eax.
+		call getIndex				; Retrieve the edx'th node from the list.
+		
+		cmp eax, 0					; Determine if a null pointer was returned (empty list).
+		je .donePrinting			; If a null pointer was returned leave the routine.
+
+		call edx					; Print the contents of the element.
+		inc ebx						; Increment edx to be able to call the node.
+		jmp .iterateThroughList		; Loop around.
+
+	.donePrinting:
+		mov eax, ecx				; Restore eax with the value of the list.
+
+		pop edx						; Restore the used registers to their orignal state.
+		pop ecx
+		pop ebx
+		pop eax
+		ret 

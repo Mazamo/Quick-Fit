@@ -374,6 +374,7 @@ SECTION .text
 	;	EAX: Address of the requested data
 	;-----------------------------------------------------------------------------
 	getIndex:
+		push ebx
 		push ecx					; Store the used register on the stack.
 
 		cmp eax, 0					; Determine if eax represents a valid address.
@@ -405,6 +406,7 @@ SECTION .text
 		
 	.doneRetrieving:
 		pop ecx						; Restore the used register to its original state.
+		pop ebx
 		ret
 
 	;-----------------------------------------------------------------------------
@@ -665,7 +667,9 @@ SECTION .text
 		je .donePrinting			; If a null pointer was returned leave the routine.
 
 		call edx					; Print the contents of the element.
-		inc ebx						; Increment edx to be able to call the node.
+	.debug:
+		inc ebx						; Increment ebx to be able to call the node.
+
 		jmp .iterateThroughList		; Loop around.
 
 	.donePrinting:

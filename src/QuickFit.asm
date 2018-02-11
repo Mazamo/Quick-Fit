@@ -9,7 +9,7 @@
 global ListOnePtr
 global ListTwoPtr
 global ListThreePtr
-global ListFourtPtr
+global ListFourPtr
 global ListFivePtr
 global ListSixPtr
 

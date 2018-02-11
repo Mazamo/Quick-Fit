@@ -7,7 +7,7 @@
 ; Description				: Main logic for the QuickFit logic.
 
 SECTION .data
-	BlockMessage 		db 	"These blocks are %d bytes in size:", 10, 0
+	BlockMessage 		db 	10, "This block is %d bytes in size.", 10, 0
 	AllocMessage		db  "%d. This block is allocted and contains the following: %s", 10, 0
 	AllocEmptyMessage	db  "%d. This block is allocted and contains no data.", 10, 0
 	FreeMessage			db 	"%d. This block is free.", 10, 0
@@ -42,6 +42,7 @@ SECTION .text
 	; Parameters:
 	; 	EAX: Pointer to the memory block structure that is displayed
 	; 	EBX: Index of the memory block in the list
+	;	ESI: Block size of the printed blocks.
 	;
 	; Return:
 	; 	None
@@ -53,6 +54,13 @@ SECTION .text
 		je .donePrinting
 
 		inc ebx
+
+		pushad
+		push esi
+		push BlockMessage
+		call printf
+		add esp, 8
+		popad
 
 		cmp dword [eax], 0
 		je .printFreeBlock
@@ -114,9 +122,31 @@ SECTION .text
 		mov eax, 40
 		call allocateData
 
+		; Print all of the existing memory blocks:
 		mov ebx, printMemoryBlock
+	
+		mov eax, [ListOnePtr]
+		mov esi, 5
+		call printElements
+
+		mov eax, [ListTwoPtr]
+		mov esi, 10
+		call printElements
+	
+		mov eax, [ListThreePtr]
+		mov esi, 20
+		call printElements
+
+		mov eax, [ListFourPtr]
+		mov esi, 40
+		call printElements
+	
+		mov eax, [ListFivePtr]
+		mov esi, 60
+		call printElements
 
 		mov eax, [ListSixPtr]
+		mov esi, 160
 		call printElements
 		
 		call bufferDestroy
@@ -124,5 +154,3 @@ SECTION .text
 		mov esp, ebp
 		pop ebp
 		ret
-
-

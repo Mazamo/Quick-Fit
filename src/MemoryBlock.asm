@@ -16,7 +16,7 @@ global MemoryBlockSize					; The size of a memory block structure.
 SECTION .data
 
 SECTION .bss
-	MemoryBlockSize			equ 2		; The size of a memory block structure in dwords.
+	MemoryBlockSize			equ 8		; The size of a memory block structure in bytes.
 
 SECTION .text
 	global initializeMemoryBlock		; Create a new memory block structure.
@@ -119,7 +119,7 @@ SECTION .text
 
 	;-----------------------------------------------------------------------------
 	; Retrieve the memory address member of a memory block.
-	; -- Last update 05/05/2018
+	; -- Last update 05/02/2018
 	;
 	; Parameters:
 	;	EAX: Pointer to the memory block from which the memory address is retrieved
@@ -131,7 +131,7 @@ SECTION .text
 		cmp eax, 0						; Determine if eax contains a valid value.
 		je .doneRetrieving				; If eax is invalid leave the routine.
 
-		lea eax, [eax + 4]				; Store the block's memory address member in eax.
+		mov eax, [eax + 4]				; Store the block's memory address member in eax.
 
 	.doneRetrieving:
 		ret
@@ -164,7 +164,15 @@ SECTION .text
 		ret
 
 	;-----------------------------------------------------------------------------
-	; Find a free memory block by comparing 
+	; Find a free memory block by checking the allocated member of a provided
+	; memory block structure. -- Last update 09/02/2018
+	; 
+	; Parameters:
+	;	EAX: Pointer to the memory block 
+	;
+	; Return:
+	;	EAX: Integer value indicating the result of the determination (1 free, 
+	;		 0 allocated).
 	;-----------------------------------------------------------------------------
 	findFreeMemoryBlock:
 		cmp eax, 0						; Determine if eax contains a valid value.

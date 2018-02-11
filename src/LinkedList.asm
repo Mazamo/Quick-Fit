@@ -2,7 +2,7 @@
 ; Exectuable name		: None
 ; Version				: 1.0
 ; Created date			: 01/02/2018
-; Last update			: 05/02/2018
+; Last update			: 10/02/2018
 ; Author				: Nick de Visser
 ; Description			: An implementation of a double linked list data structure using NASM 2.11.08.
 ;
@@ -21,8 +21,8 @@ global NodeSize					; The size of a node structure.
 SECTION .data
 
 SECTION .bss
-	ListSize		equ 2		; The size of a list structure in dwords.
-	NodeSize		equ 3		; The size of a node structure in dwords.
+	ListSize		equ 8		; The size of a list structure in bytes.
+	NodeSize		equ 12		; The size of a node structure in bytes.
 	
 SECTION .text
 	global createLinkedList		; Create a new list instance.
@@ -376,7 +376,7 @@ SECTION .text
 		je .doneRetrieving			; If eax is invalid leave the routine.
 
 		cmp dword [eax], 0			; Determine if the list contains elements.
-		mov eax, [eax]
+		mov eax, [eax]				; Move the first node into eax.
 		jne .iterateThroughList		; If the list is not empty iterate through the list.
 		
 		jmp .elementNotFound		; Leave the routine.
@@ -597,7 +597,6 @@ SECTION .text
 		je .noAction				; If the linked list is empty leave the routine.
 
 		mov eax, [eax]				; Move the first node of the list into eax.
-
 	.iterateThroughList:
 		push eax					; Store the current node on the stack.
 		mov eax, [eax + 8]			; Store the data stored in the current node into eax.
@@ -605,7 +604,6 @@ SECTION .text
 		mov ecx, eax				; Store the return value in ecx.
 		pop eax						; Restore the current node value into eax.
 
-	.debug
 		cmp ebx, 1					; Determine if the current node is the right node.
 		je .foundData				; If the current node is the right node leave the routine.
 

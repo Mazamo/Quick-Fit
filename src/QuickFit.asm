@@ -2,14 +2,14 @@
 ; Exectuable name		: None
 ; Version 				: 0.1
 ; Created date			: 05/02/2018
-; Last update			: 08/02/2018
+; Last update			: 10/02/2018
 ; Author				: Nick de Visser
 ; Decription			: An implementation of the quick fit memory allocation algorithm.
 
 SECTION .data
 
 SECTION .bss
-	FIVE_BLOCK 			equ 5 	
+	FIVE_BLOCK 			equ 5			
 	TEN_BLOCK			equ 10 
 	TWENTY_BLOCK		equ 20
 	FOURTY_BLOCK		equ 40
@@ -70,32 +70,33 @@ SECTION .text
 		je .doneInitializing			; If the size is invallid
 
 		mov dword [BufferSize], ebx		; Move the size of the buffer into the BufferSize variable.
+		mov ecx, ListSize				; Mov the size of a list into ecx.
 
 		mov dword [BaseMemoryPtr], eax	; Set the BaseMemoryPtr with the address of the buffer.
 		
 		mov dword [ListOnePtr], eax 	; Move the base memory address into ListOnePtr.
 		call createLinkedList			; Initialize the first linked list.
-		lea eax, [eax + 8]				; Adjust the address stored in eax.
+		lea eax, [eax + ecx]			; Adjust the address stored in eax.
 	
 		mov dword [ListTwoPtr], eax		; Set adjusted memory memory address into ListTwoPtr.
 		call createLinkedList			; initialize the second linked list.
-		lea eax, [eax + 8]				; Adjust the address stored in eax.
+		lea eax, [eax + ecx]			; Adjust the address stored in eax.
 				
 		mov dword [ListThreePtr], eax	; Set adjusted memory memory address into ListThreePtr.
 		call createLinkedList			; initialize the third linked list.
-		lea eax, [eax + 8]				; Adjust the address stored in eax.
+		lea eax, [eax + ecx]			; Adjust the address stored in eax.
 	
 		mov dword [ListFourPtr], eax	; Set adjusted memory memory address into ListFourPtr.
 		call createLinkedList			; initialize the fourth linked list.
-		lea eax, [eax + 8]				; Adjust the address stored in eax.
+		lea eax, [eax + ecx]			; Adjust the address stored in eax.
 	
 		mov dword [ListFivePtr], eax	; Set adjusted memory memory address into ListFivePtr.
 		call createLinkedList			; initialize the fifth linked list.
-		lea eax, [eax + 8]				; Adjust the address stored in eax.
+		lea eax, [eax + ecx]			; Adjust the address stored in eax.
 	
 		mov dword [ListSixPtr], eax		; Set adjusted memory memory address into ListSixPtr.
 		call createLinkedList			; initialize the six linked list.
-		lea eax, [eax + 8]				; Adjust the address stored in eax.	
+		lea eax, [eax + ecx]			; Adjust the address stored in eax.
 
 		mov dword [OffsetMemoryPtr], eax; Adjust the OffsetMemoryPtr to reference the start of 
 										; the writeble memory region.
@@ -117,43 +118,47 @@ SECTION .text
 	;-----------------------------------------------------------------------------
 	bufferDestroy:
 		push eax 						; Store the used register on the stack.
-	
+		push ecx
+
 		cmp dword [BaseMemoryPtr], 0	; Determine if the BaseMemoryPtr is initialized.
 		je .doneDestroying				; If it isn't initialized leave the routine.
+
+		mov ecx, ListSize				; Move the size of a list structure into ecx.
 
 		mov eax, BaseMemoryPtr			; Move the BaseMemoryPtr into eax.
 		call destroyLinkedList			; Destroy the first linked list.
 		mov dword [ListOnePtr], 0		; Remove the reference to the list structure.
-		lea eax, [eax + 8]				; Adjust the address stored in eax.
+		lea eax, [eax + ecx]			; Adjust the address stored in eax.
 		
 		call destroyLinkedList			; Destroy the second linked list.
 		mov dword [ListTwoPtr], 0		; Remove the reference to the list structure.
-		lea eax, [eax + 8]				; Adjust the address stored in eax.
+		lea eax, [eax + ecx]			; Adjust the address stored in eax.
 
 		call destroyLinkedList			; Destroy the third linked list.
 		mov dword [ListThreePtr], 0		; Remove the reference to the list structure.
-		lea eax, [eax + 8]				; Adjust the address stored in eax.
+		lea eax, [eax + ecx]			; Adjust the address stored in eax.
 
 		mov eax, BaseMemoryPtr			; Destroy the fourth linked list.
 		call destroyLinkedList			; Remove the reference to the list structure.
 		mov dword [ListFourPtr], 0		; Adjust the address stored in eax.
-		lea eax, [eax + 8]
+		lea eax, [eax + ecx]			; Adjust the address stored in eax.
 
 		mov eax, BaseMemoryPtr			; Destory the fith linked list.
 		call destroyLinkedList			; Remove the reference to the list structure.
 		mov dword [ListFivePtr], 0		; Adjust the address stored in eax.
-		lea eax, [eax + 8]
+		lea eax, [eax + ecx]			; Adjust the address stored in eax.
 
 		mov eax, BaseMemoryPtr			; Destroy the sixth linked list.
 		call destroyLinkedList			; Remove the reference to the list structure.
 		mov dword [ListFourPtr], 0		; Adjust the address stored in eax.
-		lea eax, [eax + 8]
+		lea eax, [eax + ecx]			; Adjust the address stored in eax.
 
 		mov dword [BaseMemoryPtr], 0	; Remove the reference to the base memory pointer.
 		mov dword [OffsetMemoryPtr], 0	; Remove the reference to the offset memory pointer.
 		mov dword [BufferSize], 0		; Reset the size of the buffer to zero.
 
 	.doneDestroying:
+		pop ecx							; Restore the registers to their original state.
 		pop eax		
 		ret
 
@@ -302,7 +307,9 @@ SECTION .text
 
 		add ebx, NodeSize				; Add the size of the newly added node to the mem. block size.
 		add ebx, MemoryBlockSize		; Add the size of the added memory block to the mem. block size.
-		add dword [ecx], ebx			; Add the used size to the memory offset. 
+	.debug:
+		add ecx, ebx					; Add the used size to the memory offset. 
+		mov dword [OffsetMemoryPtr], ecx; Move the new offset into the OffsetMemoryPtr.
 
 	.allocateExistingBlock:				; It is assumed eax contains a pointer to a memory block structure.
 		call allocateMemoryBlock		; Allocate the memory block.
